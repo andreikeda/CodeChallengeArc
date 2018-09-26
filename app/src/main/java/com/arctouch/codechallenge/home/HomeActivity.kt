@@ -4,6 +4,9 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.arctouch.codechallenge.R
@@ -13,7 +16,9 @@ import kotlinx.android.synthetic.main.home_activity.*
 class HomeActivity : AppCompatActivity(), HomeModule.View {
 
     private var presenter: HomeModule.Presenter? = null
-    private var moviesLiveData: MutableLiveData<List<Movie>>? = MutableLiveData()
+    private val moviesLiveData: MutableLiveData<List<Movie>> = MutableLiveData()
+    private val pageLiveData: MutableLiveData<Long> = MutableLiveData()
+    private val hasMorePagesLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     override fun hideLoading() {
         progressBar.visibility = View.GONE
@@ -24,10 +29,30 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
         setContentView(R.layout.home_activity)
 
         presenter = HomePresenter(this)
-        moviesLiveData?.observe(this, Observer {
-            it?.let { setAdapter(it) } ?: run { presenter?.callMoviesApi(1) }
+
+        moviesLiveData.observe(this, Observer {
+            it?.let { setAdapter(it) } ?: run { searchForPage() }
         })
-        presenter?.callMoviesApi(1)
+
+        searchForPage()
+
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                val shallLoadContent : Boolean = hasMorePagesLiveData.value?.let { it } ?: run { true }
+                when (shallLoadContent) {
+                    true -> {
+                        val layoutManager = recyclerView?.layoutManager as LinearLayoutManager
+                        val visibleItemCount = layoutManager.childCount
+                        val totalItemCount = layoutManager.itemCount
+                        val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+
+                        if (visibleItemCount + pastVisibleItems >= totalItemCount && !progressBar.isShown) {
+                            searchForPage()
+                        }
+                    }
+                }
+            }
+        })
     }
 
     override fun onDestroy() {
@@ -38,7 +63,15 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
     }
 
     override fun loadedMovies(movies: List<Movie>) {
-        moviesLiveData?.postValue(movies)
+        moviesLiveData.postValue(movies)
+    }
+
+    override fun setPage(page: Long) {
+        pageLiveData.value = page
+    }
+
+    override fun setHasMorePages(hasMorePages: Boolean) {
+        hasMorePagesLiveData.value = hasMorePages
     }
 
     override fun showError(errorMessage: String) {
@@ -49,7 +82,18 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
         progressBar.visibility = View.VISIBLE
     }
 
+    private fun searchForPage() {
+        val currentPage : Long = pageLiveData.value?.let { it + 1 } ?: run { 1L }
+        presenter?.callMoviesApi(currentPage)
+    }
+
     private fun setAdapter(movies: List<Movie>) {
-        recyclerView.adapter = HomeAdapter(presenter, movies)
+        when (recyclerView.adapter) {
+            null -> recyclerView.adapter = HomeAdapter(presenter, movies.toMutableList())
+            else -> {
+                (recyclerView.adapter as HomeAdapter).addData(movies)
+                recyclerView.adapter.notifyDataSetChanged()
+            }
+        }
     }
 }

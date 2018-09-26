@@ -19,6 +19,8 @@ class HomePresenter(var view : HomeModule.View?) : HomeModule.Presenter, HomeMod
             movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
         }
         view?.loadedMovies(moviesWithGenres)
+        view?.setPage(response.page.toLong())
+        view?.setHasMorePages(response.page < response.totalPages)
         view?.hideLoading()
     }
 
