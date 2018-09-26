@@ -17,6 +17,7 @@ interface HomeModule {
 
     interface Presenter {
         fun callMoviesApi(page: Long)
+        fun onMovieItemClicked(movie: Movie)
         fun unregister()
     }
 

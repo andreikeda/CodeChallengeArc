@@ -2,6 +2,7 @@ package com.arctouch.codechallenge.home
 
 import android.app.Activity
 import com.arctouch.codechallenge.data.Cache
+import com.arctouch.codechallenge.model.Movie
 import com.arctouch.codechallenge.model.UpcomingMoviesResponse
 
 class HomePresenter(var view : HomeModule.View?) : HomeModule.Presenter, HomeModule.InteractorOutput {
@@ -24,6 +25,10 @@ class HomePresenter(var view : HomeModule.View?) : HomeModule.Presenter, HomeMod
     override fun callMoviesApi(page: Long) {
         view?.showLoading()
         interactor?.loadMovies(page)
+    }
+
+    override fun onMovieItemClicked(movie: Movie) {
+        router?.goToDetailScreen(movie)
     }
 
     override fun unregister() {
