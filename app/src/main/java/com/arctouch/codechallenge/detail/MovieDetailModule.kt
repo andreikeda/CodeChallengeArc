@@ -6,6 +6,7 @@ interface MovieDetailModule {
 
     interface Presenter {
         fun onActivityCreated(movie: Movie)
+        fun unregister()
     }
 
     interface View {

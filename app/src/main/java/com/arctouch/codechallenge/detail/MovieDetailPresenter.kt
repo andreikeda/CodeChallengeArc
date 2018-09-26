@@ -6,7 +6,16 @@ class MovieDetailPresenter(var view: MovieDetailModule.View?) : MovieDetailModul
 
     override fun onActivityCreated(movie: Movie) {
         movie.backdropPath?.let { view?.setBackdrop(it) }
-        movie.genres?.let {  }
+        movie.genres?.let {
+            var genres = ""
+            for (i in 0 until it.size) {
+                genres += it[i].name
+                if (i < (it.size - 1)) {
+                    genres += ", "
+                }
+            }
+            view?.setGenres(genres)
+        }
         movie.overview?.let { view?.setOverview(it) }
         movie.posterPath?.let { view?.setPoster(it) }
         movie.releaseDate?.let { view?.setReleaseDate(it) }
