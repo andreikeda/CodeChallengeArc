@@ -37,7 +37,7 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
     }
 
     override fun setAdapter(movies: List<Movie>) {
-        recyclerView.adapter = HomeAdapter(movies)
+        recyclerView.adapter = HomeAdapter(presenter, movies)
     }
 
     override fun showError(errorMessage: String) {
