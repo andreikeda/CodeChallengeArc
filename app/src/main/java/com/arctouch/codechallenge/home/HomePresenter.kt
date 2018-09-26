@@ -18,7 +18,7 @@ class HomePresenter(var view : HomeModule.View?) : HomeModule.Presenter, HomeMod
         val moviesWithGenres = response.results.map { movie ->
             movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
         }
-        view?.setAdapter(moviesWithGenres)
+        view?.loadedMovies(moviesWithGenres)
         view?.hideLoading()
     }
 

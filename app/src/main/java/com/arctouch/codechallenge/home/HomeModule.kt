@@ -28,7 +28,7 @@ interface HomeModule {
 
     interface View {
         fun hideLoading()
-        fun setAdapter(movies: List<Movie>)
+        fun loadedMovies(movies: List<Movie>)
         fun showError(errorMessage: String)
         fun showLoading()
     }
