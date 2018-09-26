@@ -1,21 +1,22 @@
 package com.arctouch.codechallenge.splash
 
+import android.app.Application
 import com.arctouch.codechallenge.model.Genre
 
 interface SplashModule {
 
     interface Interactor {
-        fun loadGenres()
+        fun loadGenres(application: Application)
         fun unregister()
     }
 
     interface InteractorOutput {
         fun loadedGenresError(errorMessage: String)
-        fun loadedGenresSuccess(genres: List<Genre>)
+        fun loadedGenresSuccess()
     }
 
     interface Presenter {
-        fun callGenresApi()
+        fun callGenresApi(application: Application)
         fun unregister()
     }
 
@@ -25,7 +26,6 @@ interface SplashModule {
     }
 
     interface View {
-        fun loadedGenres(genres: List<Genre>)
         fun showError(errorMessage: String)
     }
 }

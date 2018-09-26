@@ -1,7 +1,7 @@
 package com.arctouch.codechallenge.splash
 
 import android.app.Activity
-import com.arctouch.codechallenge.model.Genre
+import android.app.Application
 
 class SplashPresenter(var view : SplashModule.View?) : SplashModule.Presenter, SplashModule.InteractorOutput {
 
@@ -12,12 +12,12 @@ class SplashPresenter(var view : SplashModule.View?) : SplashModule.Presenter, S
         view?.showError(errorMessage)
     }
 
-    override fun loadedGenresSuccess(genres: List<Genre>) {
-        view?.loadedGenres(genres)
+    override fun loadedGenresSuccess() {
+        router?.goToHomeScreen()
     }
 
-    override fun callGenresApi() {
-        interactor?.loadGenres()
+    override fun callGenresApi(application: Application) {
+        interactor?.loadGenres(application)
     }
 
     override fun unregister() {

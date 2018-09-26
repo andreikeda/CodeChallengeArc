@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import com.arctouch.codechallenge.model.Genre
 
-private const val DB_NAME = "database"
+private const val DB_NAME = "arch_db"
 private const val DB_VERSION = 1
 
 @Database(entities = [Genre::class], version = DB_VERSION)
@@ -30,6 +30,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     }
 
-    abstract fun cacheDao() : CacheDao
+    abstract fun genreDao() : GenreDao
 
 }

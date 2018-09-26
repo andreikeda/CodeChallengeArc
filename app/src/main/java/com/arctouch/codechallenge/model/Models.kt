@@ -1,14 +1,16 @@
 package com.arctouch.codechallenge.model
 
 import android.arch.persistence.room.Entity
+import android.arch.persistence.room.Ignore
+import android.arch.persistence.room.PrimaryKey
 import com.squareup.moshi.Json
 import java.io.Serializable
 
 data class GenreResponse(val genres: List<Genre>)
 
 @Entity(tableName = "genreData")
-data class Genre(val id: Int, val name: String) : Serializable {
-    constructor() : this(0, "")
+data class Genre(@PrimaryKey(autoGenerate = true) var id: Int?, val name: String) : Serializable {
+    @Ignore constructor() : this(null, "")
 }
 
 data class UpcomingMoviesResponse(
