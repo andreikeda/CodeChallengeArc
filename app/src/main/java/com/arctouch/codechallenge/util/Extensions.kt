@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.arctouch.codechallenge.api.TmdbApi
 import com.arctouch.codechallenge.detail.MovieDetailActivity
+import com.arctouch.codechallenge.home.HomeActivity
 import com.arctouch.codechallenge.model.Movie
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -19,6 +20,10 @@ val api: TmdbApi = Retrofit.Builder()
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
         .create(TmdbApi::class.java)
+
+fun Context.buildHomeIntent() : Intent {
+    return Intent(this, HomeActivity::class.java)
+}
 
 fun Context.buildMovieDetailIntent(movie: Movie) : Intent {
     return Intent(this, MovieDetailActivity::class.java).apply {
