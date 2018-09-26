@@ -29,6 +29,8 @@ interface HomeModule {
     interface View {
         fun hideLoading()
         fun loadedMovies(movies: List<Movie>)
+        fun setPage(page: Long)
+        fun setHasMorePages(hasMorePages: Boolean)
         fun showError(errorMessage: String)
         fun showLoading()
     }
