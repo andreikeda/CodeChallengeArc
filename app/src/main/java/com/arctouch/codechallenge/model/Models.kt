@@ -1,11 +1,15 @@
 package com.arctouch.codechallenge.model
 
+import android.arch.persistence.room.Entity
 import com.squareup.moshi.Json
 import java.io.Serializable
 
 data class GenreResponse(val genres: List<Genre>)
 
-data class Genre(val id: Int, val name: String) : Serializable
+@Entity(tableName = "genreData")
+data class Genre(val id: Int, val name: String) : Serializable {
+    constructor() : this(0, "")
+}
 
 data class UpcomingMoviesResponse(
     val page: Int,
