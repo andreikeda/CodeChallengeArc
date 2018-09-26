@@ -6,7 +6,7 @@ import com.arctouch.codechallenge.model.UpcomingMoviesResponse
 interface HomeModule {
 
     interface Interactor {
-        fun loadMovies(page: Int)
+        fun loadMovies(page: Long)
         fun unregister()
     }
 
@@ -16,7 +16,7 @@ interface HomeModule {
     }
 
     interface Presenter {
-        fun callMoviesApi(page: Int)
+        fun callMoviesApi(page: Long)
         fun unregister()
     }
 

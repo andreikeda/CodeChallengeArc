@@ -1,6 +1,7 @@
 package com.arctouch.codechallenge.home
 
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.arctouch.codechallenge.R
 import com.arctouch.codechallenge.api.TmdbApi
@@ -10,7 +11,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.home_activity.*
 
-class HomeActivity : BaseActivity() {
+class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
