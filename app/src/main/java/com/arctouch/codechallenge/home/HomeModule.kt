@@ -7,16 +7,20 @@ interface HomeModule {
 
     interface Interactor {
         fun loadMovies(page: Long)
+        fun searchMovies(query: String, page: Long)
         fun unregister()
     }
 
     interface InteractorOutput {
         fun loadedMoviesError(errorMessage: String)
         fun loadedMoviesSuccess(response: UpcomingMoviesResponse)
+        fun searchedMoviesError(errorMessage: String)
+        fun searchedMoviesSuccess()
     }
 
     interface Presenter {
         fun callMoviesApi(page: Long)
+        fun callSearchMoviesApi(query: String, page: Long)
         fun onMovieItemClicked(movie: Movie)
         fun unregister()
     }
