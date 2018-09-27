@@ -1,30 +1,135 @@
 package com.arctouch.codechallenge.home
 
+import android.app.SearchManager
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
+import android.util.Log
+import android.view.Menu
 import android.view.View
+import android.widget.Toast
 import com.arctouch.codechallenge.R
-import com.arctouch.codechallenge.api.TmdbApi
-import com.arctouch.codechallenge.base.BaseActivity
-import com.arctouch.codechallenge.data.Cache
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.arctouch.codechallenge.model.Movie
 import kotlinx.android.synthetic.main.home_activity.*
 
-class HomeActivity : BaseActivity() {
+class HomeActivity : AppCompatActivity(), HomeModule.View {
+
+    private var presenter: HomeModule.Presenter? = null
+    private var query: String = ""
+    private val moviesLiveData: MutableLiveData<List<Movie>> = MutableLiveData()
+    private val pageLiveData: MutableLiveData<Long> = MutableLiveData()
+    private val hasMorePagesLiveData: MutableLiveData<Boolean> = MutableLiveData()
+
+    override fun hideLoading() {
+        progressBar.visibility = View.GONE
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu) : Boolean {
+        menuInflater.inflate(R.menu.home_menu, menu)
+
+        val manager = getSystemService(SEARCH_SERVICE) as SearchManager
+        val search = menu.findItem(R.id.search).actionView as SearchView
+        search.setSearchableInfo(manager.getSearchableInfo(componentName))
+        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(q: String?): Boolean {
+                reinitializeAdapter()
+                query = q?.let { it } ?: run { "" }
+                searchForPage()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+        return true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
-        api.upcomingMovies(TmdbApi.API_KEY, TmdbApi.DEFAULT_LANGUAGE, 1, TmdbApi.DEFAULT_REGION)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                val moviesWithGenres = it.results.map { movie ->
-                    movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
+        presenter = HomePresenter(this)
+
+        moviesLiveData.observe(this, Observer {
+            it?.let { setAdapter(it) } ?: run { searchForPage() }
+        })
+
+        searchForPage()
+
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                val shallLoadContent : Boolean = hasMorePagesLiveData.value?.let { it } ?: run { true }
+                when (shallLoadContent) {
+                    true -> {
+                        val layoutManager = recyclerView?.layoutManager as LinearLayoutManager
+                        val visibleItemCount = layoutManager.childCount
+                        val totalItemCount = layoutManager.itemCount
+                        val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+
+                        if (visibleItemCount + pastVisibleItems >= totalItemCount && !progressBar.isShown) {
+                            searchForPage()
+                        }
+                    }
                 }
-                recyclerView.adapter = HomeAdapter(moviesWithGenres)
-                progressBar.visibility = View.GONE
             }
+        })
+    }
+
+    override fun onDestroy() {
+        presenter?.unregister()
+        presenter = null
+
+        super.onDestroy()
+    }
+
+    override fun loadedMovies(movies: List<Movie>) {
+        moviesLiveData.postValue(movies)
+    }
+
+    override fun setPage(page: Long) {
+        pageLiveData.value = page
+    }
+
+    override fun setHasMorePages(hasMorePages: Boolean) {
+        hasMorePagesLiveData.value = hasMorePages
+    }
+
+    override fun showError(errorMessage: String) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+    }
+
+    override fun showLoading() {
+        progressBar.visibility = View.VISIBLE
+    }
+
+    private fun reinitializeAdapter() {
+        setPage(1)
+        setHasMorePages(true)
+        (recyclerView.adapter as HomeAdapter).clear()
+        recyclerView.adapter.notifyDataSetChanged()
+    }
+
+    private fun searchForPage() {
+        val currentPage : Long = pageLiveData.value?.let { it + 1 } ?: run { 1L }
+        if (query.isEmpty()) {
+            presenter?.callMoviesApi(currentPage)
+        } else {
+            presenter?.callSearchMoviesApi(query, currentPage)
+        }
+    }
+
+    private fun setAdapter(movies: List<Movie>) {
+        when (recyclerView.adapter) {
+            null -> recyclerView.adapter = HomeAdapter(presenter, movies.toMutableList())
+            else -> {
+                (recyclerView.adapter as HomeAdapter).addData(movies)
+                recyclerView.adapter.notifyDataSetChanged()
+            }
+        }
     }
 }
