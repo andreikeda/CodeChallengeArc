@@ -3,6 +3,7 @@ package com.arctouch.codechallenge.splash
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import com.arctouch.codechallenge.R
 import com.arctouch.codechallenge.api.TmdbApi
 import com.arctouch.codechallenge.base.BaseActivity
@@ -18,7 +19,7 @@ class SplashActivity : AppCompatActivity(), SplashModule.View {
     private var presenter : SplashModule.Presenter? = null
 
     override fun showError(errorMessage: String) {
-
+        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

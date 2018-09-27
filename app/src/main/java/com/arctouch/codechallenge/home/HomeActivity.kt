@@ -1,12 +1,15 @@
 package com.arctouch.codechallenge.home
 
+import android.app.SearchManager
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
 import android.util.Log
+import android.view.Menu
 import android.view.View
 import android.widget.Toast
 import com.arctouch.codechallenge.R
@@ -22,6 +25,25 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
 
     override fun hideLoading() {
         progressBar.visibility = View.GONE
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu) : Boolean {
+        menuInflater.inflate(R.menu.home_menu, menu)
+
+        val manager = getSystemService(SEARCH_SERVICE) as SearchManager
+        val search = menu.findItem(R.id.search).actionView as SearchView
+        search.setSearchableInfo(manager.getSearchableInfo(componentName))
+        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // LOAD HISTORY
+                return true
+            }
+        })
+        return true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
