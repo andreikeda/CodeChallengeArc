@@ -1,6 +1,7 @@
 package com.arctouch.codechallenge.home
 
 import com.arctouch.codechallenge.model.Movie
+import com.arctouch.codechallenge.model.SearchingMoviesResponse
 import com.arctouch.codechallenge.model.UpcomingMoviesResponse
 
 interface HomeModule {
@@ -15,7 +16,7 @@ interface HomeModule {
         fun loadedMoviesError(errorMessage: String)
         fun loadedMoviesSuccess(response: UpcomingMoviesResponse)
         fun searchedMoviesError(errorMessage: String)
-        fun searchedMoviesSuccess()
+        fun searchedMoviesSuccess(response: SearchingMoviesResponse)
     }
 
     interface Presenter {

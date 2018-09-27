@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.home_activity.*
 class HomeActivity : AppCompatActivity(), HomeModule.View {
 
     private var presenter: HomeModule.Presenter? = null
+    private var query: String = ""
     private val moviesLiveData: MutableLiveData<List<Movie>> = MutableLiveData()
     private val pageLiveData: MutableLiveData<Long> = MutableLiveData()
     private val hasMorePagesLiveData: MutableLiveData<Boolean> = MutableLiveData()
@@ -34,13 +35,15 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
         val search = menu.findItem(R.id.search).actionView as SearchView
         search.setSearchableInfo(manager.getSearchableInfo(componentName))
         search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
+            override fun onQueryTextSubmit(q: String?): Boolean {
+                reinitializeAdapter()
+                query = q?.let { it } ?: run { "" }
+                searchForPage()
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                // LOAD HISTORY
-                return true
+                return false
             }
         })
         return true
@@ -104,9 +107,20 @@ class HomeActivity : AppCompatActivity(), HomeModule.View {
         progressBar.visibility = View.VISIBLE
     }
 
+    private fun reinitializeAdapter() {
+        setPage(1)
+        setHasMorePages(true)
+        (recyclerView.adapter as HomeAdapter).clear()
+        recyclerView.adapter.notifyDataSetChanged()
+    }
+
     private fun searchForPage() {
         val currentPage : Long = pageLiveData.value?.let { it + 1 } ?: run { 1L }
-        presenter?.callMoviesApi(currentPage)
+        if (query.isEmpty()) {
+            presenter?.callMoviesApi(currentPage)
+        } else {
+            presenter?.callSearchMoviesApi(query, currentPage)
+        }
     }
 
     private fun setAdapter(movies: List<Movie>) {

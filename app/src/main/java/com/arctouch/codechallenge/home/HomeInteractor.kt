@@ -20,6 +20,18 @@ class HomeInteractor(var output : HomeModule.InteractorOutput?) : HomeModule.Int
                 }
     }
 
+    override fun searchMovies(query: String, page: Long) {
+        api.searchingMovies(TmdbApi.API_KEY, TmdbApi.DEFAULT_LANGUAGE, page, TmdbApi.DEFAULT_REGION, query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError {
+                    output?.searchedMoviesError(it.localizedMessage)
+                }
+                .subscribe {
+                    output?.searchedMoviesSuccess(it)
+                }
+    }
+
     override fun unregister() {
         output = null
     }

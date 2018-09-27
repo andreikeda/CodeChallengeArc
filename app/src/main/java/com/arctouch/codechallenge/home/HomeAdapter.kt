@@ -42,4 +42,8 @@ class HomeAdapter(private val presenter: HomeModule.Presenter?, private val movi
     fun addData(movies: List<Movie>) {
         this.movies.addAll(movies)
     }
+
+    fun clear() {
+        this.movies.clear()
+    }
 }

@@ -3,12 +3,23 @@ package com.arctouch.codechallenge.home
 import android.app.Activity
 import com.arctouch.codechallenge.data.Cache
 import com.arctouch.codechallenge.model.Movie
+import com.arctouch.codechallenge.model.SearchingMoviesResponse
 import com.arctouch.codechallenge.model.UpcomingMoviesResponse
 
 class HomePresenter(var view : HomeModule.View?) : HomeModule.Presenter, HomeModule.InteractorOutput {
 
     private var interactor: HomeModule.Interactor? = HomeInteractor(this)
     private var router: HomeModule.Router? = HomeRouter(view as Activity)
+
+    override fun callMoviesApi(page: Long) {
+        view?.showLoading()
+        interactor?.loadMovies(page)
+    }
+
+    override fun callSearchMoviesApi(query: String, page: Long) {
+        view?.showLoading()
+        interactor?.searchMovies(query, page)
+    }
 
     override fun loadedMoviesError(errorMessage: String) {
         view?.showError(errorMessage)
@@ -24,13 +35,22 @@ class HomePresenter(var view : HomeModule.View?) : HomeModule.Presenter, HomeMod
         view?.hideLoading()
     }
 
-    override fun callMoviesApi(page: Long) {
-        view?.showLoading()
-        interactor?.loadMovies(page)
-    }
-
     override fun onMovieItemClicked(movie: Movie) {
         router?.goToDetailScreen(movie)
+    }
+
+    override fun searchedMoviesError(errorMessage: String) {
+        view?.showError(errorMessage)
+    }
+
+    override fun searchedMoviesSuccess(response: SearchingMoviesResponse) {
+        val moviesWithGenres = response.results.map { movie ->
+            movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
+        }
+        view?.loadedMovies(moviesWithGenres)
+        view?.setPage(response.page.toLong())
+        view?.setHasMorePages(response.page < response.totalPages)
+        view?.hideLoading()
     }
 
     override fun unregister() {
